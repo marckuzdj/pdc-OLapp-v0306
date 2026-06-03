@@ -596,167 +596,163 @@
 
 
 			function enviarParaServidor(conteudo, liberacao) {
-			 // 1. CAIXA DE CONFIRMAÇÃO NATIVA COLETOR
-			 const confirmar = confirm("Seguir com o import da base?");
-			 if (!confirmar) {
-			   return; // Cancela a operação e mantém o arquivo disponível para troca
-			 }
-			 
-			 // 2. CAPTURA DOS ELEMENTOS DO FORMULÁRIO PARA TRAVA SEGURA
-			 const btn = document.getElementById('btnEnviarBase');
-			 const statusEl = document.getElementById('statusEnvio');
-			 const fileInput = document.getElementById('arquivoCSV');
-			 const selectLiberacao = document.getElementById('liberacaoCarga');
-			 const linkPendentes = document.querySelector('a[onclick="carregarTokensPendentes()"]');
-			 
-			 // CIRÚRGICO: Captura os novos links mapeados no seu HTML original
-			 const linkTokenDev = document.getElementById('lnkTokenDev');
-			 const linkAlterarRom = document.getElementById('lnkAlterarRom');
-			 
-			 // 3. BLOQUEIO RÍGIDO DE TODOS OS COMANDOS (Anti-duplo clique operacional)
-			 btn.disabled = true;
-			 btn.innerHTML = '<div class="spinner"></div> Aguarde Processamento...';
-			 if (fileInput) fileInput.disabled = true;
-			 if (selectLiberacao) selectLiberacao.disabled = true;
+			// 1. CAIXA DE CONFIRMAÇÃO NATIVA COLETOR
+			const confirmar = confirm("Seguir com o import da base?");
+			if (!confirmar) {
+			 return; // Cancela a operação e mantém o arquivo disponível para troca
+			}
+			// 2. CAPTURA DOS ELEMENTOS DO FORMULÁRIO PARA TRAVA SEGURA
+			const btn = document.getElementById('btnEnviarBase');
+			const statusEl = document.getElementById('statusEnvio');
+			const fileInput = document.getElementById('arquivoCSV');
+			const selectLiberacao = document.getElementById('liberacaoCarga');
+			const linkPendentes = document.querySelector('a[onclick="carregarTokensPendentes()"]');
+			// CIRÚRGICO: Captura os novos links mapeados no seu HTML original
+			const linkTokenDev = document.getElementById('lnkTokenDev');
+			const linkAlterarRom = document.getElementById('lnkAlterarRom');
+			// 3. BLOQUEIO RÍGIDO DE TODOS OS COMANDOS (Anti-duplo clique operacional)
+			btn.disabled = true;
+			btn.innerHTML = '<div class="spinner"></div> Aguarde Processamento...';
+			if (fileInput) fileInput.disabled = true;
+			if (selectLiberacao) selectLiberacao.disabled = true;
+			if (linkPendentes) {
+			 linkPendentes.style.pointerEvents = 'none';
+			 linkPendentes.style.opacity = '0.5';
+			}
+			if (linkTokenDev) {
+			 linkTokenDev.style.pointerEvents = 'none';
+			 linkTokenDev.style.opacity = '0.4';
+			}
+			if (linkAlterarRom) {
+			 linkAlterarRom.style.pointerEvents = 'none';
+			 linkAlterarRom.style.opacity = '0.4';
+			}
+			exibirAviso('statusEnvio', 'Processando dados no servidor...', 'loading');
+			
+			// Montagem do payload transacional unificado (🎯 INJEÇÃO CIRÚRGICA: Adicionado a chave 'uf')
+			const payload = {
+			 action: 'processarUpload',
+			 liberacao: liberacao,
+			 conferente: document.getElementById('userLogadoDisplay').value,
+			 operador: document.getElementById('operadorLogadoDisplay').value,
+			 fileContent: conteudo,
+			 uf: UF_SELECIONADA // 🚀 Vincula a região ativa escolhida no primeiro modal
+			};
+			
+			// Disparo HTTP POST em modo texto plano direcionado ao Web App
+			fetch(WEB_APP_URL, {
+			 method: 'POST',
+			 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+			 body: JSON.stringify(payload)
+			})
+			.then(response => response.json())
+			.then(res => {
+			 // 4. DESBLOQUEIO COMPLETO DOS INPUTS APÓS RETORNO DO SERVIDOR
+			 if (fileInput) fileInput.disabled = false;
+			 if (selectLiberacao) selectLiberacao.disabled = false;
 			 
 			 if (linkPendentes) {
-			   linkPendentes.style.pointerEvents = 'none';
-			   linkPendentes.style.opacity = '0.5';
+			 linkPendentes.style.pointerEvents = 'auto';
+			 linkPendentes.style.opacity = '1';
 			 }
 			 if (linkTokenDev) {
-			   linkTokenDev.style.pointerEvents = 'none';
-			   linkTokenDev.style.opacity = '0.4';
+			 linkTokenDev.style.pointerEvents = 'auto';
+			 linkTokenDev.style.opacity = '1';
 			 }
 			 if (linkAlterarRom) {
-			   linkAlterarRom.style.pointerEvents = 'none';
-			   linkAlterarRom.style.opacity = '0.4';
+			 linkAlterarRom.style.pointerEvents = 'auto';
+			 linkAlterarRom.style.opacity = '1';
 			 }
 			 
-			 exibirAviso('statusEnvio', 'Processando dados no servidor...', 'loading');
+			 btn.disabled = false;
+			 btn.innerHTML = 'Enviar Base';
 			 
-			 // Montagem do payload transacional unificado
-			 const payload = {
-			   action: 'processarUpload',
-			   liberacao: liberacao,
-			   conferente: document.getElementById('userLogadoDisplay').value,
-			   operador: document.getElementById('operadorLogadoDisplay').value,
-			   fileContent: conteudo
-			 };
+			 // ==========================================================================
+			 // RASTREIO OPERACIONAL: DIAGNÓSTICO FORÇADO DO PAYLOAD (ANTI-DESCONHECIDO)
+			 // ==========================================================================
+			 // Força a exibição em uma caixa pop-up nativa para lermos a estrutura do JSON
+			 // ==========================================================================
+			 // ENCAIXE CIRÚRGICO DE CONTRATO PROTEGIDO (VERSÃO RESILIENTE DEFINITIVA)
+			 // ==========================================================================
+			 const textoMensagem = (res.mensagem || res.message || res.msg || "").toString();
+			 const statusLimpo = (res.status || res.Status || "").toString().toUpperCase();
+			 const isTrueSuccess = (res.success === true || res.Success === true || res.authorized === true);
 			 
-			 // Disparo HTTP POST em modo texto plano direcionado ao Web App
-			 fetch(WEB_APP_URL, {
-			   method: 'POST',
-			   headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-			   body: JSON.stringify(payload)
-			 })
-			 .then(response => response.json())
-			 .then(res => {
-			   // 4. DESBLOQUEIO COMPLETO DOS INPUTS APÓS RETORNO DO SERVIDOR
-			   if (fileInput) fileInput.disabled = false;
-			   if (selectLiberacao) selectLiberacao.disabled = false;
-			   
-			   if (linkPendentes) {
-			     linkPendentes.style.pointerEvents = 'auto';
-			     linkPendentes.style.opacity = '1';
-			   }
-			   if (linkTokenDev) {
-			     linkTokenDev.style.pointerEvents = 'auto';
-			     linkTokenDev.style.opacity = '1';
-			   }
-			   if (linkAlterarRom) {
-			     linkAlterarRom.style.pointerEvents = 'auto';
-			     linkAlterarRom.style.opacity = '1';
-			   }
-			   
-			   btn.disabled = false;
-			   btn.innerHTML = 'Enviar Base';
-			
-			   // =========================================================================
-			   // RASTREIO OPERACIONAL: DIAGNÓSTICO FORÇADO DO PAYLOAD (ANTI-DESCONHECIDO)
-			   // =========================================================================
-			   // Força a exibição em uma caixa pop-up nativa para lermos a estrutura do JSON
-				// =========================================================================
-				// ENCAIXE CIRÚRGICO DE CONTRATO PROTEGIDO (VERSÃO RESILIENTE DEFINITIVA)
-				// =========================================================================
-				const textoMensagem = (res.mensagem || res.message || res.msg || "").toString();
-				const statusLimpo = (res.status || res.Status || "").toString().toUpperCase();
-				const isTrueSuccess = (res.success === true || res.Success === true || res.authorized === true);
-				
-				// 1. Validação de Erros explícitos do servidor
-				if (statusLimpo === "ERRO" || textoMensagem.indexOf("Erro") !== -1) {
-				    exibirAviso('statusEnvio', textoMensagem || 'Erro ao processar arquivo.', 'error');
-			        
-			    // 2. Validação de Cargas Recusadas (Célula A2 com dados)
-			 	} else if (res && res.recusados && res.recusados.length > 0) {
-			     exibirAviso('statusEnvio', '', ''); 
-			     
-			     const listaFormatada = res.recusados.map(function(id) {
-			       return "• <strong>" + id + "</strong>";
-			     }).join("<br>");
-			     
-			     document.getElementById('modalTitulo').innerText = "Carga Recusada";
-			     document.getElementById('modalMensagem').innerHTML = 
-			       "<div style='text-align: left; line-height: 1.6;'>" +
-			         listaFormatada + "<br><br>" +
-			         "<p style='background: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; border: 1px solid #ffeeba; margin: 5px 0;'>" +
-			           "Estes romaneios já foram enviados anteriormente. Para reenviar, cancele cada um dos romaneio via link 'Alterar Romaneio'" +
-			         "</p> " +
-			       "</div>";
-			       
-			     // CIRÚRGICO: Aplica o texto compacto apenas para Carga Recusada
-			     const btnFecharModal = document.querySelector('#modalSucesso button');
-			     if (btnFecharModal) {
-			       btnFecharModal.innerText = "Estou Ciente";
-			     }
-			     
-			     document.getElementById('modalSucesso').classList.remove('hidden');
-				   
-			   // 3. VALIDAÇÃO ULTRA-AMPLA DE SUCESSO
-			   } else if (statusLimpo === "OK" || statusLimpo === "SUCCESS" || isTrueSuccess || textoMensagem !== "") {
-			     document.getElementById('modalTitulo').innerText = "Excelente!";
-			     document.getElementById('modalMensagem').innerHTML = "<strong>O upload foi concluído!</strong><br><br>" + (textoMensagem || "Carga processada na planilha.");
-			     
-			     // CIRÚRGICO: Garante o texto longo com o aviso de tokens no caso de sucesso
-			     const btnFecharModal = document.querySelector('#modalSucesso button');
-			     if (btnFecharModal) {
-			       btnFecharModal.innerText = "Estou Ciente e Anotei os Tokens";
-			     }
-			     
-			     document.getElementById('modalSucesso').classList.remove('hidden');
-			     
-			     if (fileInput) fileInput.value = ''; 
-			     exibirAviso('statusEnvio', '', ''); 
-			     
-			   } else {
-			     exibirAviso('statusEnvio', 'Erro desconhecido na validação do arquivo.', 'error');
-			   }
-			   // =========================================================================
-			 })
-			 .catch(err => {
-			   // REVERTE AS TRAVAS OPERACIONAIS EM CASO DE FALHA DE CONEXÃO FÍSICA
-			   if (fileInput) fileInput.disabled = false;
-			   if (selectLiberacao) selectLiberacao.disabled = false;
-			   
-			   if (linkPendentes) {
-			     linkPendentes.style.pointerEvents = 'auto';
-			     linkPendentes.style.opacity = '1';
-			   }
-			   if (linkTokenDev) {
-			     linkTokenDev.style.pointerEvents = 'auto';
-			     linkTokenDev.style.opacity = '1';
-			   }
-			   if (linkAlterarRom) {
-			     linkAlterarRom.style.pointerEvents = 'auto';
-			     linkAlterarRom.style.opacity = '1';
-			   }
-			   
-			   btn.disabled = false;
-			   btn.innerHTML = 'Enviar Base';
-			   
-			   exibirAviso('statusEnvio', 'Falha na comunicação: Verifique sua internet.', 'error');
-			   console.error("Erro crítico de conexão de rede:", err);
-			 });
+			 // 1. Validação de Erros explícitos do servidor
+			 if (statusLimpo === "ERRO" || textoMensagem.indexOf("Erro") !== -1) {
+			  exibirAviso('statusEnvio', textoMensagem || 'Erro ao processar arquivo.', 'error');
+			  
+			  // 2. Validação de Cargas Recusadas (Célula A2 com dados)
+			 } else if (res && res.recusados && res.recusados.length > 0) {
+			  exibirAviso('statusEnvio', '', ''); 
+			  
+			  const listaFormatada = res.recusados.map(function(id) {
+			  return "• <strong>" + id + "</strong>";
+			  }).join("<br>");
+			  
+			  document.getElementById('modalTitulo').innerText = "Carga Recusada";
+			  document.getElementById('modalMensagem').innerHTML = 
+			  "<div style='text-align: left; line-height: 1.6;'>" +
+			  listaFormatada + "<br><br>" +
+			  "<p style='background: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; border: 1px solid #ffeeba; margin: 5px 0;'>" +
+			  "Estes romaneios já foram enviados anteriormente. Para reenviar, cancele cada um dos romaneio via link 'Alterar Romaneio'" +
+			  "</p> " +
+			  "</div>";
+			  
+			  // CIRÚRGICO: Aplica o texto compacto apenas para Carga Recusada
+			  const btnFecharModal = document.querySelector('#modalSucesso button');
+			  if (btnFecharModal) {
+			  btnFecharModal.innerText = "Estou Ciente";
+			  }
+			  
+			  document.getElementById('modalSucesso').classList.remove('hidden');
+			  
+			  // 3. VALIDAÇÃO ULTRA-AMPLA DE SUCESSO
+			 } else if (statusLimpo === "OK" || statusLimpo === "SUCCESS" || isTrueSuccess || textoMensagem !== "") {
+			  document.getElementById('modalTitulo').innerText = "Excelente!";
+			  document.getElementById('modalMensagem').innerHTML = "<strong>O upload foi concluído!</strong><br><br>" + (textoMensagem || "Carga processada na planilha.");
+			  
+			  // CIRÚRGICO: Garante o texto longo com o aviso de tokens no caso de sucesso
+			  const btnFecharModal = document.querySelector('#modalSucesso button');
+			  if (btnFecharModal) {
+			  btnFecharModal.innerText = "Estou Ciente e Anotei os Tokens";
+			  }
+			  
+			  document.getElementById('modalSucesso').classList.remove('hidden');
+			  
+			  if (fileInput) fileInput.value = ''; 
+			  exibirAviso('statusEnvio', '', ''); 
+			  
+			 } else {
+			  exibirAviso('statusEnvio', 'Erro desconhecido na validação do arquivo.', 'error');
+			 }
+			})
+			.catch(err => {
+			 // REVERTE AS TRAVAS OPERACIONAIS EM CASO DE FALHA DE CONEXÃO FÍSICA
+			 if (fileInput) fileInput.disabled = false;
+			 if (selectLiberacao) selectLiberacao.disabled = false;
+			 
+			 if (linkPendentes) {
+			 linkPendentes.style.pointerEvents = 'auto';
+			 linkPendentes.style.opacity = '1';
+			 }
+			 if (linkTokenDev) {
+			 linkTokenDev.style.pointerEvents = 'auto';
+			 linkTokenDev.style.opacity = '1';
+			 }
+			 if (linkAlterarRom) {
+			 linkAlterarRom.style.pointerEvents = 'auto';
+			 linkAlterarRom.style.opacity = '1';
+			 }
+			 
+			 btn.disabled = false;
+			 btn.innerHTML = 'Enviar Base';
+			 
+			 exibirAviso('statusEnvio', 'Falha na comunicação: Verifique sua internet.', 'error');
+			 console.error("Erro crítico de conexão de rede:", err);
+			});
 			}
+
 
 
 
